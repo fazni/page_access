@@ -22,6 +22,7 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
   $node = $form_state->getFormObject()->getEntity();
   // Get default values.
   $defaults = page_access_get_node_defaults($node);
+  // Get available user roles.
   $user_roles = user_role_names(TRUE);
   $form['page_access'] = [
     '#type' => 'details',
