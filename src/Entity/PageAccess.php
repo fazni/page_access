@@ -23,8 +23,7 @@ use Drupal\page_access\PageAccessInterface;
  *   translatable = FALSE,
  *   entity_keys = {
  *     "id" = "id",
- *     "uuid" = "uuid",
- *     "bundle" = "bundle"
+ *     "uuid" = "uuid"
  *   },
  * )
  */
@@ -95,4 +94,5 @@ class PageAccess extends ContentEntityBase implements PageAccessInterface {
     return $this->get('value')->get(0)->toArray();
   }
 
+}
 }
