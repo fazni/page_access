@@ -204,6 +204,9 @@ function page_access_add_or_remove_user_callback(array $form, FormStateInterface
 function page_access_get_node_defaults($node) {
   $node_id = $node->id();
   $defaults = [];
+  if (empty($node_id)) {
+    return $defaults;
+  }
   $page_access_entity = PageAccess::loadByNid($node_id);
   if (!empty($page_access_entity)) {
     $id = $page_access_entity->id();
