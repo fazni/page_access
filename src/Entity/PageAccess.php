@@ -95,4 +95,3 @@ class PageAccess extends ContentEntityBase implements PageAccessInterface {
   }
 
 }
-}

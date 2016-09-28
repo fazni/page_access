@@ -315,12 +315,12 @@ function _get_user_reference_default_value($uid) {
  *
  * @ingroup node_access
  */
-function page_access_node_access(\Drupal\node\NodeInterface $node, $op, Drupal\Core\Session\AccountInterface $account) {
+function page_access_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
 
   switch ($op) {
     case 'view':
     case 'update':
-      $access = page_access_get_user_access($node, $account);
+      $access = \Drupal::service('page_access.default')->get_user_node_access($node, $account);
 
       if ($access === NULL) {
         return AccessResult::neutral();
@@ -336,35 +336,4 @@ function page_access_node_access(\Drupal\node\NodeInterface $node, $op, Drupal\C
       // No opinion.
       return AccessResult::neutral();
   }
-}
-
-/**
- * @param \Drupal\node\NodeInterface $node
- * @param integer $uid
- *
- * @return array|null
- */
-function page_access_get_user_access($node, $account) {
-  $page_access_settings = page_access_get_node_defaults($node);
-  if (!empty($page_access_settings['id'])) {
-    $user_has_access = [];
-    $user_roles = $account->getRoles();
-    $allowed_roles = $page_access_settings['page_access']['roles'];
-    if (!empty(array_intersect($user_roles, $allowed_roles))) {
-      return ['view', 'update'];
-    }
-
-    $uid = $account->id();
-    foreach ($page_access_settings['page_access']['users'] as $access) {
-      if ($access['user_autocomplete'] == $uid) {
-        $user_has_access[] = 'view';
-        if ($access['edit_permission']) {
-          $user_has_access[] = 'update';
-        }
-        break;
-      }
-    }
-    return $user_has_access;
-  }
-  return NULL;
 }
