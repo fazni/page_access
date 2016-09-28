@@ -24,7 +24,7 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
   $defaults = page_access_get_node_defaults($node);
   // Get available user roles.
   $user_roles = user_role_names(TRUE);
-  // Remove administrator role.
+  // Remove administrator role from available user roles.
   unset($user_roles['administrator']);
   $form['page_access'] = [
     '#type' => 'details',
