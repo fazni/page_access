@@ -296,3 +296,75 @@ function _get_user_reference_default_value($uid) {
   }
   return '';
 }
+
+/**
+ * Controls access to a node.
+ *
+ * Decide on access to view/update, if page access settings is been enabled for
+ * the node entity based on current user.
+ *
+ * @param \Drupal\node\NodeInterface|string $node
+ *   Node entity.
+ * @param string $op
+ *   The operation to be performed.
+ * @param \Drupal\Core\Session\AccountInterface $account
+ *   User object.
+ *
+ * @return \Drupal\Core\Access\AccessResultInterface
+ *    The access result.
+ *
+ * @ingroup node_access
+ */
+function page_access_node_access(\Drupal\node\NodeInterface $node, $op, Drupal\Core\Session\AccountInterface $account) {
+
+  switch ($op) {
+    case 'view':
+    case 'update':
+      $access = page_access_get_user_access($node, $account);
+
+      if ($access === NULL) {
+        return AccessResult::neutral();
+      }
+      elseif (in_array($op, $access)) {
+        return AccessResult::allowed();
+      }
+      else {
+        return AccessResult::forbidden();
+      }
+
+    default:
+      // No opinion.
+      return AccessResult::neutral();
+  }
+}
+
+/**
+ * @param \Drupal\node\NodeInterface $node
+ * @param integer $uid
+ *
+ * @return array|null
+ */
+function page_access_get_user_access($node, $account) {
+  $page_access_settings = page_access_get_node_defaults($node);
+  if (!empty($page_access_settings['id'])) {
+    $user_has_access = [];
+    $user_roles = $account->getRoles();
+    $allowed_roles = $page_access_settings['page_access']['roles'];
+    if (!empty(array_intersect($user_roles, $allowed_roles))) {
+      return ['view', 'update'];
+    }
+
+    $uid = $account->id();
+    foreach ($page_access_settings['page_access']['users'] as $access) {
+      if ($access['user_autocomplete'] == $uid) {
+        $user_has_access[] = 'view';
+        if ($access['edit_permission']) {
+          $user_has_access[] = 'update';
+        }
+        break;
+      }
+    }
+    return $user_has_access;
+  }
+  return NULL;
+}
