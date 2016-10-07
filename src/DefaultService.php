@@ -34,7 +34,7 @@ class DefaultService {
 
       $uid = $account->id();
       foreach ($page_access_settings['page_access']['users'] as $access) {
-        if ($access['user_autocomplete'] == $uid) {
+        if ($access['user_autocomplete'] === $uid) {
           $user_has_access[] = 'view';
           if ($access['edit_permission']) {
             $user_has_access[] = 'update';
