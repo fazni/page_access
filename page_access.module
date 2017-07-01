@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Allows administrators to customize page level access.
- */
-
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\page_access\Entity\PageAccess;
 use Drupal\user\Entity\User;
