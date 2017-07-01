@@ -136,7 +136,9 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
   $form['page_access']['list']['add_user'] = [
     '#type' => 'submit',
     '#value' => t('Add user'),
-    '#submit' => array('page_access_add_user'),
+    '#submit' => [
+      'page_access_add_user'
+    ],
     '#ajax' => [
       'callback' => 'page_access_add_or_remove_user_callback',
       'wrapper' => 'page_access_user_list',
