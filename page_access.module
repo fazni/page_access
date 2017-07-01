@@ -113,7 +113,9 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
       $form['page_access']['list'][$i]['remove'] = [
         '#type' => 'submit',
         '#value' => 'X',
-        '#submit' => array('page_access_remove_user'),
+        '#submit' => [
+          'page_access_remove_user'
+        ],
         '#ajax' => [
           'callback' => 'page_access_add_or_remove_user_callback',
           'wrapper' => 'page_access_user_list',
