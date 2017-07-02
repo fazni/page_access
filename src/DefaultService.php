@@ -6,7 +6,7 @@ use Drupal\node\NodeInterface;
 use Drupal\Core\Session\AccountInterface;
 
 /**
- * Class PageAccess.
+ * Class PageAccess. Which provide the all the relevant functionalities.
  *
  * @package Drupal\page_access
  */
