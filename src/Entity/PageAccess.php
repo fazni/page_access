@@ -91,7 +91,15 @@ class PageAccess extends ContentEntityBase implements PageAccessInterface {
    * @return mixed
    */
   public function value() {
-    return $this->get('value')->get(0)->toArray();
+    $values = $this->get('value')->get(0)->toArray();
+    if (!empty($values['users'])) {
+      foreach ($values['users'] as $key => $value) {
+        if (is_object($value)) {
+          unset($values['users'][$key]);
+        }
+      }
+    }
+    return $values;
   }
 
 }
