@@ -95,24 +95,26 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
       unset($form['page_access']['list'][$i]);
       continue;
     }
-    $user_reference = _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']);
-    $form['page_access']['list'][$i]['user_autocomplete'] = [
-      '#type' => 'entity_autocomplete',
-      '#target_type' => 'user',
-      '#selection_settings' => ['include_anonymous' => FALSE],
-      '#attributes' => [
-        'class' => ['page-access-user-autocomplete'],
-        'placeholder' => 'Username',
-      ],
-      '#prefix' => '<div class="container-inline" id="page-access-' . $i . '">',
-      '#default_value' => $user_reference,
-    ];
+    if (is_array($defaults['page_access']['users'][$i])) {
+      $user_reference = _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']);
+      $form['page_access']['list'][$i]['user_autocomplete'] = [
+        '#type' => 'entity_autocomplete',
+        '#target_type' => 'user',
+        '#selection_settings' => ['include_anonymous' => FALSE],
+        '#attributes' => [
+          'class' => ['page-access-user-autocomplete'],
+          'placeholder' => 'Username',
+        ],
+        '#prefix' => '<div class="container-inline" id="page-access-' . $i . '">',
+        '#default_value' => $user_reference,
+      ];
+    }
     $form['page_access']['list'][$i]['edit_permission'] = [
       '#type' => 'checkbox',
       '#default_value' => 0,
       '#title' => 'Edit',
       '#attributes' => ['class' => ['page-access-edit-access']],
-      '#default_value' => (int) (bool) $defaults['page_access']['users'][$i]['edit_permission'],
+      '#default_value' => is_array($defaults['page_access']['users'][$i]) ? (int) (bool) $defaults['page_access']['users'][$i]['edit_permission'] : NULL,
     ];
     if ($i) {
       $form['page_access']['list'][$i]['remove'] = [
