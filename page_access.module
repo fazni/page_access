@@ -17,7 +17,8 @@ use Drupal\Core\Access\AccessResult;
  *
  * @see page_access_form_node_form_submit()
  */
-function page_access_form_node_form_alter(&$form, FormStateInterface &$form_state) {
+function page_access_form_node_form_alter(&$form,
+                                          FormStateInterface &$form_state) {
   // Get current form node.
   $node = $form_state->getFormObject()->getEntity();
   // Get default values.
@@ -57,7 +58,7 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
         'input[name="page_access[enabled]"]' => ['checked' => FALSE],
       ],
     ],
-    '#default_value' => $defaults['page_access']['roles'],
+    '#default_value' => $defaults['page_access']['roles'] ?? [],
   ];
   $form['page_access']['users'] = [
     '#type' => 'item',
@@ -81,7 +82,8 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
   ];
   if (empty($form_state->get('page_access_users_count'))) {
     if (!empty($defaults['page_access'])) {
-      $form_state->set('page_access_users_count', count($defaults['page_access']['users']));
+      $form_state->set('page_access_users_count',
+        count($defaults['page_access']['users']));
     }
     else {
       $form_state->set('page_access_users_count', 1);
@@ -95,8 +97,8 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
       unset($form['page_access']['list'][$i]);
       continue;
     }
-    if (is_array($defaults['page_access']['users'][$i])) {
-      $user_reference = _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']);
+    if (isset($defaults['page_access']['users'][$i]) && is_array($defaults['page_access']['users'][$i])) {
+      $user_reference = isset($defaults['page_access']['users'][$i]['user_autocomplete']) ? _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']) : '';
       $form['page_access']['list'][$i]['user_autocomplete'] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'user',
@@ -109,18 +111,19 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
         '#default_value' => $user_reference,
       ];
     }
+    $default = isset($defaults['page_access']['users'][$i]) && is_array($defaults['page_access']['users'][$i]);
     $form['page_access']['list'][$i]['edit_permission'] = [
       '#type' => 'checkbox',
       '#default_value' => 0,
       '#title' => 'Edit',
       '#attributes' => ['class' => ['page-access-edit-access']],
-      '#default_value' => is_array($defaults['page_access']['users'][$i]) ? (int) (bool) $defaults['page_access']['users'][$i]['edit_permission'] : NULL,
+      '#default_value' => $default ? (int) (bool) $defaults['page_access']['users'][$i]['edit_permission'] : NULL,
     ];
     if ($i) {
       $form['page_access']['list'][$i]['remove'] = [
         '#type' => 'submit',
         '#value' => 'X',
-        '#submit' => array('page_access_remove_user'),
+        '#submit' => ['page_access_remove_user'],
         '#ajax' => [
           'callback' => 'page_access_add_or_remove_user_callback',
           'wrapper' => 'page_access_user_list',
@@ -141,7 +144,7 @@ function page_access_form_node_form_alter(&$form, FormStateInterface &$form_stat
   $form['page_access']['list']['add_user'] = [
     '#type' => 'submit',
     '#value' => t('Add user'),
-    '#submit' => array('page_access_add_user'),
+    '#submit' => ['page_access_add_user'],
     '#ajax' => [
       'callback' => 'page_access_add_or_remove_user_callback',
       'wrapper' => 'page_access_user_list',
@@ -190,18 +193,19 @@ function page_access_remove_user(array $form, FormStateInterface &$form_state) {
  *
  * @return mixed
  */
-function page_access_add_or_remove_user_callback(array $form, FormStateInterface &$form_state) {
+function page_access_add_or_remove_user_callback(array $form,
+                                                 FormStateInterface &$form_state) {
   return $form['page_access']['list'];
 }
 
 /**
  * Method to load page access entity using node id.
  *
- * @param $nid
+ * @param int $nid
  *
  * @return \Drupal\Core\Entity\EntityInterface[]
  */
-function loadByNid($nid) {
+function loadByNid(int $nid) {
   $page_access_storage = \Drupal::entityManager()->getStorage('page_access');
   return array_shift($page_access_storage->loadByProperties(['nid' => $nid]));
 }
@@ -216,12 +220,13 @@ function loadByNid($nid) {
  *   An array that contains default values for the page access form.
  */
 function page_access_get_node_defaults($node) {
-  $node_id = $node->id();
+  $node_id = (int) $node->id();
   $defaults = [];
   if (empty($node_id)) {
     return $defaults;
   }
-  $page_access_entity = loadByNid($node_id);
+var_dump($node_id);
+  $page_access_entity = @loadByNid($node_id);
   if (!empty($page_access_entity)) {
     $id = $page_access_entity->id();
     $page_access = $page_access_entity->value();
@@ -245,7 +250,8 @@ function page_access_get_node_defaults($node) {
  * @param $form
  * @param \Drupal\Core\Form\FormStateInterface $form_state
  */
-function page_access_form_node_form_submit($form, FormStateInterface $form_state) {
+function page_access_form_node_form_submit($form,
+                                           FormStateInterface $form_state) {
   $node_id = $form_state->getFormObject()->getEntity()->id();
   if (!$form_state->isValueEmpty('page_access')) {
     $values = $form_state->getValue('page_access');
@@ -329,12 +335,15 @@ function _get_user_reference_default_value($uid) {
  *
  * @ingroup node_access
  */
-function page_access_node_access(\Drupal\node\NodeInterface $node, $op, \Drupal\Core\Session\AccountInterface $account) {
+function page_access_node_access(\Drupal\node\NodeInterface $node,
+                                 $op,
+                                 \Drupal\Core\Session\AccountInterface $account) {
 
   switch ($op) {
     case 'view':
     case 'update':
-      $access = \Drupal::service('page_access.default')->get_user_node_access($node, $account);
+      $access = \Drupal::service('page_access.default')
+        ->get_user_node_access($node, $account);
 
       if ($access === NULL) {
         return AccessResult::neutral();
