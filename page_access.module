@@ -98,7 +98,7 @@ function page_access_form_node_form_alter(&$form,
       continue;
     }
     if (isset($defaults['page_access']['users'][$i]) && is_array($defaults['page_access']['users'][$i])) {
-      $user_reference = isset($defaults['page_access']['users'][$i]['user_autocomplete']) ? _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']) : '';
+      $user_reference = isset($defaults['page_access']['users'][$i]['user_autocomplete']) ? _get_user_reference_default_value($defaults['page_access']['users'][$i]['user_autocomplete']) : NULL;
       $form['page_access']['list'][$i]['user_autocomplete'] = [
         '#type' => 'entity_autocomplete',
         '#target_type' => 'user',
@@ -225,7 +225,6 @@ function page_access_get_node_defaults($node) {
   if (empty($node_id)) {
     return $defaults;
   }
-var_dump($node_id);
   $page_access_entity = @loadByNid($node_id);
   if (!empty($page_access_entity)) {
     $id = $page_access_entity->id();
