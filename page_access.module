@@ -193,6 +193,18 @@ function page_access_add_or_remove_user_callback(array $form, FormStateInterface
 }
 
 /**
+ * Method to load page access entity using node id.
+ *
+ * @param $nid
+ *
+ * @return \Drupal\Core\Entity\EntityInterface[]
+ */
+function loadByNid($nid) {
+  $page_access_storage = \Drupal::entityManager()->getStorage('page_access');
+  return array_shift($page_access_storage->loadByProperties(['nid' => $nid]));
+}
+
+/**
  * Returns the definition for page access for the given node.
  *
  * @param \Drupal\node\NodeInterface $node
@@ -207,7 +219,7 @@ function page_access_get_node_defaults($node) {
   if (empty($node_id)) {
     return $defaults;
   }
-  $page_access_entity = PageAccess::loadByNid($node_id);
+  $page_access_entity = loadByNid($node_id);
   if (!empty($page_access_entity)) {
     $id = $page_access_entity->id();
     $page_access = $page_access_entity->value();
